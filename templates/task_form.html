@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% if form_mode == "edit" %}
+    {% set page_title = "Görev Düzenle" %}
+    {% set badge_text = "Görev Düzenleme" %}
+    {% set form_action = url_for('edit_task', task_id=task['id']) %}
+    {% set button_text = "Değişiklikleri Kaydet" %}
+{% else %}
+    {% set page_title = "Yeni Görev" %}
+    {% set badge_text = "Görev Oluşturma" %}
+    {% set form_action = url_for('create_task', project_id=project['id']) %}
+    {% set button_text = "Görevi Kaydet" %}
+{% endif %}
+
+{% block title %}{{ page_title }} | YBS TaskHub{% endblock %}
+
+{% block content %}
+
+<section class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <div class="form-card">
+                <a href="{{ url_for('project_detail', project_id=project['id']) }}" class="back-link">
+                    ← Proje Panosu
+                </a>
+
+                <span class="hero-badge mt-3">{{ badge_text }}</span>
+
+                <h1>{{ page_title }}</h1>
+                <p class="form-lead">
+                    {{ project["title"] }} projesi için görev bilgilerini girin ve iş akışına ekleyin.
+                </p>
+
+                <form method="POST" action="{{ form_action }}">
+                    <div class="mb-3">
+                        <label class="form-label">Görev Adı</label>
+                        <input
+                            type="text"
+                            name="title"
+                            class="form-control"
+                            placeholder="Örn: Final raporu ekran görüntülerini ekle"
+                            value="{{ task['title'] if task else '' }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Görev Açıklaması</label>
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Görevin kısa açıklamasını yazın."
+                        >{{ task['description'] if task else '' }}</textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Öncelik</label>
+                            <select name="priority" class="form-select">
+                                {% for priority in priority_options %}
+                                    <option
+                                        value="{{ priority }}"
+                                        {% if task and task['priority'] == priority %}selected{% endif %}
+                                    >
+                                        {{ priority }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Durum</label>
+                            <select name="status" class="form-select">
+                                {% for status in status_options %}
+                                    <option
+                                        value="{{ status }}"
+                                        {% if task and task['status'] == status %}selected{% endif %}
+                                    >
+                                        {{ status }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 mb-4">
+                        <label class="form-label">Son Teslim Tarihi</label>
+                        <input
+                            type="date"
+                            name="due_date"
+                            class="form-control"
+                            value="{{ task['due_date'] if task else '' }}"
+                        >
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{{ url_for('project_detail', project_id=project['id']) }}" class="btn btn-outline-secondary">
+                            Vazgeç
+                        </a>
+
+                        <button type="submit" class="btn btn-primary">
+                            {{ button_text }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <aside class="form-info-card">
+                <h2>Görev akışı</h2>
+                <p>
+                    Görevler yapılacak, devam ediyor ve tamamlandı durumlarına göre proje panosunda takip edilir.
+                </p>
+
+                <div class="form-info-list">
+                    <span>Düşük / Orta / Yüksek öncelik</span>
+                    <span>Son teslim tarihi</span>
+                    <span>Duruma göre Kanban takibi</span>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

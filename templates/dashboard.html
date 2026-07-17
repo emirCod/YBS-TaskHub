@@ -1,0 +1,277 @@
+{% extends "base.html" %} {% block title %}Yönetim Paneli | YBS TaskHub{%
+endblock %} {% block content %}
+
+<section class="app-dashboard">
+  <div class="container-fluid">
+    <div class="dashboard-shell">
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-mark">TH</span>
+          <div>
+            <strong>YBS TaskHub</strong>
+            <small>Proje Yönetimi</small>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="{{ url_for('dashboard') }}" class="sidebar-link active">
+            Yönetim Paneli
+          </a>
+
+          <a href="{{ url_for('home') }}" class="sidebar-link"> Ana Sayfa </a>
+
+          <a href="#projects" class="sidebar-link"> Projeler </a>
+
+          <a href="#riskyTasks" class="sidebar-link"> Riskli Görevler </a>
+
+          <a href="{{ url_for('create_project') }}" class="sidebar-link">
+            Yeni Proje
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span>@{{ session.get("username") }}</span>
+          <a href="{{ url_for('logout') }}">Çıkış Yap</a>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <div class="dashboard-topbar">
+          <div>
+            <span class="hero-badge">Yönetim Paneli</span>
+            <h1>Çalışma Alanı</h1>
+            <p>
+              Projelerinizi, görevlerinizi ve kritik teslim tarihlerini tek
+              ekrandan takip edin.
+            </p>
+          </div>
+
+          <a
+            href="{{ url_for('create_project') }}"
+            class="btn btn-primary taskhub-btn"
+          >
+            Yeni Proje
+          </a>
+        </div>
+
+        <div class="dashboard-content-grid">
+          <div class="dashboard-left">
+            <div class="stats-grid">
+              <div class="stat-card compact-stat">
+                <span>Proje Sayısı</span>
+                <strong>{{ total_projects }}</strong>
+                <p>Aktif takip edilen proje.</p>
+              </div>
+
+              <div class="stat-card compact-stat">
+                <span>Görev Sayısı</span>
+                <strong>{{ total_tasks }}</strong>
+                <p>Tanımlanan toplam görev.</p>
+              </div>
+
+              <div class="stat-card compact-stat">
+                <span>Tamamlanan</span>
+                <strong>{{ completed_tasks }}</strong>
+                <p>Tamamlandı durumundaki görev.</p>
+              </div>
+
+              <div class="stat-card compact-stat">
+                <span>Genel İlerleme</span>
+                <strong>%{{ total_progress }}</strong>
+                <p>Tüm görevler üzerinden.</p>
+              </div>
+            </div>
+
+            <div class="overall-progress-card mt-4">
+              {% if total_tasks > 0 %}
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span>Genel tamamlanma oranı</span>
+                <strong>%{{ total_progress }}</strong>
+              </div>
+
+              <div class="progress taskhub-progress">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  aria-valuenow="{{ total_progress }}"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  data-progress="{{ total_progress }}"
+                >
+                  %{{ total_progress }}
+                </div>
+              </div>
+              {% else %}
+              <div class="no-progress-note">
+                <strong>Henüz ilerleme verisi yok.</strong>
+                <span
+                  >Görev eklediğinizde genel tamamlanma oranı burada
+                  hesaplanacaktır.</span
+                >
+              </div>
+              {% endif %}
+            </div>
+
+            <section id="projects" class="panel-section mt-4">
+              <div class="section-heading">
+                <div>
+                  <h3>Projeler</h3>
+                  <p>Oluşturduğunuz proje panoları.</p>
+                </div>
+              </div>
+
+              {% if projects %}
+              <div class="project-list">
+                {% for project in projects %}
+                <article class="project-row">
+                  <div class="project-row-main">
+                    <div class="project-title-line">
+                      <h5>{{ project.title }}</h5>
+                      <span class="status-pill">Aktif</span>
+                    </div>
+
+                    <p>
+                      {{ project.description or "Bu proje için açıklama
+                      eklenmedi." }}
+                    </p>
+
+                    <div class="progress taskhub-progress">
+                      <div
+                        class="progress-bar"
+                        role="progressbar"
+                        aria-valuenow="{{ project.progress }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        data-progress="{{ project.progress }}"
+                      >
+                        %{{ project.progress }}
+                      </div>
+                    </div>
+
+                    <div class="project-meta">
+                      <span>{{ project.task_count }} görev</span>
+                      <span>{{ project.completed_task_count }} tamamlandı</span>
+                    </div>
+                  </div>
+
+                  <div class="project-row-actions">
+                    <a
+                      href="{{ url_for('project_detail', project_id=project.id) }}"
+                      class="btn btn-outline-secondary"
+                    >
+                      Detay
+                    </a>
+
+                    <a
+                      href="{{ url_for('edit_project', project_id=project.id) }}"
+                      class="btn btn-outline-secondary"
+                    >
+                      Düzenle
+                    </a>
+
+                    <form
+                      method="POST"
+                      action="{{ url_for('delete_project', project_id=project.id) }}"
+                      onsubmit="
+                        return confirm(
+                          'Bu projeyi ve projeye bağlı tüm görevleri silmek istediğinizden emin misiniz?',
+                        );
+                      "
+                    >
+                      <button type="submit" class="btn btn-outline-secondary">
+                        Sil
+                      </button>
+                    </form>
+                  </div>
+                </article>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="empty-state dashboard-empty">
+                <h4>Henüz bir proje oluşturulmadı.</h4>
+                <p>
+                  İlk projenizi oluşturarak görevlerinizi düzenli şekilde takip
+                  etmeye başlayabilirsiniz.
+                </p>
+
+                <a
+                  href="{{ url_for('create_project') }}"
+                  class="btn btn-primary taskhub-btn empty-action"
+                >
+                  İlk Projeni Oluştur
+                </a>
+              </div>
+              {% endif %}
+            </section>
+          </div>
+
+          <aside id="riskyTasks" class="dashboard-right">
+            <div class="side-panel">
+              <div class="section-heading">
+                <div>
+                  <h3>Riskli Görevler</h3>
+                  <p>Yaklaşan veya geciken teslimler.</p>
+                </div>
+              </div>
+
+              {% if upcoming_tasks %}
+              <div class="risk-list">
+                {% for task in upcoming_tasks %}
+                <article
+                  class="mini-task-card {% if task.is_overdue %}is-overdue{% endif %}"
+                >
+                  <div
+                    class="d-flex justify-content-between align-items-start gap-3 mb-2"
+                  >
+                    <div>
+                      <h5>{{ task.title }}</h5>
+                      <p>{{ task.project_title }}</p>
+                    </div>
+
+                    <span
+                      class="priority-badge"
+                      data-priority="{{ task.priority }}"
+                    >
+                      {{ task.priority }}
+                    </span>
+                  </div>
+
+                  <div
+                    class="d-flex justify-content-between align-items-center gap-2"
+                  >
+                    <small>Son teslim: {{ task.due_date }}</small>
+
+                    {% if task.is_overdue %}
+                    <span class="risk-badge risk-overdue">
+                      {{ task.due_label }}
+                    </span>
+                    {% else %}
+                    <span class="risk-badge risk-soon">
+                      {{ task.due_label }}
+                    </span>
+                    {% endif %}
+                  </div>
+                </article>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="empty-state side-empty">
+                <div class="empty-mark">✓</div>
+                <h4>Riskli görev yok.</h4>
+                <p>
+                  Önümüzdeki 7 gün içinde yaklaşan veya geciken görev
+                  bulunmuyor.
+                </p>
+              </div>
+              {% endif %}
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

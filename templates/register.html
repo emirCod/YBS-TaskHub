@@ -1,0 +1,103 @@
+{% extends "base.html" %} {% block title %}Kayıt Ol | YBS TaskHub{% endblock %}
+{% block content %}
+
+<section class="form-page">
+  <div class="container">
+    <div class="form-shell">
+      <div class="form-card">
+        <a href="{{ url_for('home') }}" class="back-link">← Ana Sayfa</a>
+
+        <span class="hero-badge mt-3">Yeni Hesap</span>
+
+        <h1>YBS TaskHub hesabınızı oluşturun.</h1>
+        <p class="form-lead">
+          Projelerinizi ve görevlerinizi kalıcı olarak takip edebilmek için
+          hesap oluşturun.
+        </p>
+
+        <form method="POST" action="{{ url_for('register') }}">
+          <div class="mb-3">
+            <label class="form-label">Ad Soyad</label>
+            <input
+              type="text"
+              name="full_name"
+              class="form-control"
+              placeholder="Adınızı ve soyadınızı girin"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Kullanıcı Adı</label>
+            <input
+              type="text"
+              name="username"
+              class="form-control"
+              placeholder="Örn: emir"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">E-posta</label>
+            <input
+              type="email"
+              name="email"
+              class="form-control"
+              placeholder="ornek@mail.com"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Şifre</label>
+            <input
+              type="password"
+              name="password"
+              class="form-control"
+              placeholder="En az 6 karakter"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Şifre Tekrar</label>
+            <input
+              type="password"
+              name="password_confirm"
+              class="form-control"
+              placeholder="Şifrenizi tekrar girin"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary taskhub-btn w-100">
+            Kayıt Ol
+          </button>
+        </form>
+
+        <p class="form-bottom-text">
+          Zaten hesabınız var mı?
+          <a href="{{ url_for('login') }}">Giriş yapın</a>
+        </p>
+      </div>
+
+      <aside class="form-info-card">
+        <h2>Başlangıç için hazır.</h2>
+        <p>
+          Hesap oluşturduktan sonra kendi projelerinizi ekleyebilir,
+          görevlerinizi önceliklendirebilir ve ilerleme durumunu
+          izleyebilirsiniz.
+        </p>
+
+        <div class="form-info-list">
+          <span>Kullanıcıya özel panel</span>
+          <span>SQLite veri kalıcılığı</span>
+          <span>Görev ve proje yönetimi</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

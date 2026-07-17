@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş Yap | YBS TaskHub{% endblock %}
+
+{% block content %}
+
+<section class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <div class="form-card">
+                <a href="{{ url_for('home') }}" class="back-link">← Ana Sayfa</a>
+
+                <span class="hero-badge mt-3">Oturum Aç</span>
+
+                <h1>Hesabınıza giriş yapın.</h1>
+                <p class="form-lead">
+                    Projelerinizi, görevlerinizi ve teslim tarihlerinizi yönetmek için panele erişin.
+                </p>
+
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label class="form-label">E-posta veya Kullanıcı Adı</label>
+                        <input
+                            type="text"
+                            name="identifier"
+                            class="form-control"
+                            placeholder="ornek@mail.com veya kullanıcı_adı"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Şifre</label>
+                        <input
+                            type="password"
+                            name="password"
+                            class="form-control"
+                            placeholder="Şifrenizi girin"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary taskhub-btn w-100">
+                        Giriş Yap
+                    </button>
+                </form>
+
+                <p class="form-bottom-text">
+                    Hesabınız yok mu?
+                    <a href="{{ url_for('register') }}">Kayıt olun</a>
+                </p>
+            </div>
+
+            <aside class="form-info-card">
+                <h2>YBS TaskHub</h2>
+                <p>
+                    Proje panolarınızı oluşturun, görevleri durumlarına göre takip edin ve ilerleme oranlarını tek panelden görüntüleyin.
+                </p>
+
+                <div class="form-info-list">
+                    <span>Proje takibi</span>
+                    <span>Kanban görev yapısı</span>
+                    <span>Yaklaşan teslim tarihleri</span>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project["title"] }} | YBS TaskHub{% endblock %}
+
+{% block content %}
+
+<section class="project-page">
+    <div class="container-fluid project-container">
+
+        <div class="project-header">
+            <div>
+                <div class="project-top-links">
+                    <a href="{{ url_for('dashboard') }}" class="back-link">
+                        ← Yönetim Paneli
+                    </a>
+
+                    <a href="{{ url_for('home') }}" class="back-link">
+                        Ana Sayfa
+                    </a>
+
+                    <a href="{{ url_for('logout') }}" class="back-link">
+                        Çıkış Yap
+                    </a>
+                </div>
+
+                <span class="hero-badge mt-3">Proje Panosu</span>
+
+                <h1>{{ project["title"] }}</h1>
+
+                <p>
+                    {{ project["description"] or "Bu proje için açıklama eklenmedi." }}
+                </p>
+            </div>
+
+            <a href="{{ url_for('create_task', project_id=project['id']) }}" class="btn btn-primary taskhub-btn">
+                Yeni Görev
+            </a>
+        </div>
+
+        <div class="project-stats-grid">
+            <div class="stat-card compact-stat">
+                <span>Görev Sayısı</span>
+                <strong>{{ total_tasks }}</strong>
+                <p>Bu projeye eklenen toplam görev.</p>
+            </div>
+
+            <div class="stat-card compact-stat">
+                <span>Tamamlanan</span>
+                <strong>{{ completed_tasks }}</strong>
+                <p>Tamamlandı durumundaki görevler.</p>
+            </div>
+
+            <div class="stat-card compact-stat">
+                <span>Proje İlerlemesi</span>
+                <strong>%{{ progress }}</strong>
+                <p>Bu proje özelinde hesaplanan oran.</p>
+            </div>
+        </div>
+
+        <div class="overall-progress-card project-progress-card mt-4">
+            {% if total_tasks > 0 %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Proje tamamlanma oranı</span>
+                    <strong>%{{ progress }}</strong>
+                </div>
+
+                <div class="progress taskhub-progress">
+                    <div
+                        class="progress-bar"
+                        role="progressbar"
+                        aria-valuenow="{{ progress }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        data-progress="{{ progress }}"
+                    >
+                        %{{ progress }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="no-progress-note">
+                    <strong>Henüz görev eklenmedi.</strong>
+                    <span>Görev eklediğinizde proje ilerleme oranı burada hesaplanacaktır.</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="task-search-panel">
+            <div>
+                <h3>Görevlerde Ara</h3>
+                <p>Başlık, açıklama, öncelik veya görev durumuna göre arama yapabilirsiniz.</p>
+            </div>
+
+            <input
+                type="text"
+                id="taskSearchInput"
+                class="task-search-input"
+                placeholder="Görev adı, öncelik veya durum ara..."
+                autocomplete="off"
+            >
+        </div>
+
+        <div id="taskSearchEmpty" class="empty-state search-empty d-none">
+            <h4>Arama kriterine uygun görev bulunamadı.</h4>
+            <p>Farklı bir kelimeyle tekrar arama yapabilirsiniz.</p>
+        </div>
+
+        <div class="kanban-board">
+            {% for column_name, tasks in columns.items() %}
+                <div class="kanban-column modern-kanban-column">
+                    <div class="kanban-column-header">
+                        <div>
+                            <h5>{{ column_name }}</h5>
+                            <p>
+                                {% if column_name == "Yapılacak" %}
+                                    Henüz başlanmamış görevler.
+                                {% elif column_name == "Devam Ediyor" %}
+                                    Üzerinde çalışılan görevler.
+                                {% else %}
+                                    Tamamlanan görevler.
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <span class="status-pill column-count">{{ tasks|length }}</span>
+                    </div>
+
+                    {% if tasks %}
+                        <div class="task-list modern-task-list">
+                            {% for task in tasks %}
+                                <article
+                                    class="task-detail-card {% if task['is_overdue'] %}task-overdue{% endif %}"
+                                    data-task-card
+                                    data-search-text="{{ (task['title'] ~ ' ' ~ (task['description'] or '') ~ ' ' ~ task['priority'] ~ ' ' ~ task['status'])|lower }}"
+                                >
+                                    <div class="task-detail-header">
+                                        <div>
+                                            <h6>{{ task["title"] }}</h6>
+                                            <p>{{ task["description"] or "Açıklama eklenmedi." }}</p>
+                                        </div>
+
+                                        <span class="priority-badge" data-priority="{{ task['priority'] }}">
+                                            {{ task["priority"] }}
+                                        </span>
+                                    </div>
+
+                                    {% if task["due_date"] %}
+                                        <div class="task-meta mt-3">
+                                            <small>Son teslim: {{ task["due_date"] }}</small>
+
+                                            {% if task["is_overdue"] %}
+                                                <span class="risk-badge risk-overdue">
+                                                    {{ task["due_label"] }}
+                                                </span>
+                                            {% elif task["is_due_soon"] %}
+                                                <span class="risk-badge risk-soon">
+                                                    {{ task["due_label"] }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="task-card-footer">
+                                        <div class="task-secondary-actions">
+                                            <a href="{{ url_for('edit_task', task_id=task['id']) }}" class="btn btn-sm btn-outline-secondary">
+                                                Düzenle
+                                            </a>
+
+                                            <form
+                                                method="POST"
+                                                action="{{ url_for('delete_task', task_id=task['id']) }}"
+                                                onsubmit="return confirm('Bu görevi silmek istediğinizden emin misiniz?');"
+                                            >
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                    Sil
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <div class="task-status-actions">
+                                            {% if task["status"] != "Yapılacak" %}
+                                                <form method="POST" action="{{ url_for('update_task_status', task_id=task['id']) }}">
+                                                    <input type="hidden" name="status" value="Yapılacak">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                        Yapılacak
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+
+                                            {% if task["status"] != "Devam Ediyor" %}
+                                                <form method="POST" action="{{ url_for('update_task_status', task_id=task['id']) }}">
+                                                    <input type="hidden" name="status" value="Devam Ediyor">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                        Devam Ediyor
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+
+                                            {% if task["status"] != "Tamamlandı" %}
+                                                <form method="POST" action="{{ url_for('update_task_status', task_id=task['id']) }}">
+                                                    <input type="hidden" name="status" value="Tamamlandı">
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        Tamamlandı
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state kanban-empty">
+                            <h4>Görev yok</h4>
+                            <p>Bu kolonda henüz görev bulunmuyor.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

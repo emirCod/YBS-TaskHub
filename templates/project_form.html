@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% if form_mode == "edit" %}
+    {% set page_title = "Proje Düzenle" %}
+    {% set badge_text = "Proje Düzenleme" %}
+    {% set form_action = url_for('edit_project', project_id=project['id']) %}
+    {% set button_text = "Değişiklikleri Kaydet" %}
+{% else %}
+    {% set page_title = "Yeni Proje" %}
+    {% set badge_text = "Proje Oluşturma" %}
+    {% set form_action = url_for('create_project') %}
+    {% set button_text = "Projeyi Kaydet" %}
+{% endif %}
+
+{% block title %}{{ page_title }} | YBS TaskHub{% endblock %}
+
+{% block content %}
+
+<section class="form-page">
+    <div class="container">
+        <div class="form-shell">
+            <div class="form-card">
+                <a href="{{ url_for('dashboard') }}" class="back-link">← Yönetim Paneli</a>
+
+                <span class="hero-badge mt-3">{{ badge_text }}</span>
+
+                <h1>{{ page_title }}</h1>
+                <p class="form-lead">
+                    Proje bilgilerini girerek görev takibi için yeni bir çalışma alanı oluşturun.
+                </p>
+
+                <form method="POST" action="{{ form_action }}">
+                    <div class="mb-3">
+                        <label class="form-label">Proje Adı</label>
+                        <input
+                            type="text"
+                            name="title"
+                            class="form-control"
+                            placeholder="Örn: Bitirme Tezi Yönetimi"
+                            value="{{ project['title'] if project else '' }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Proje Açıklaması</label>
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Projenin amacını veya kısa açıklamasını yazın."
+                        >{{ project['description'] if project else '' }}</textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            Vazgeç
+                        </a>
+
+                        <button type="submit" class="btn btn-primary">
+                            {{ button_text }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <aside class="form-info-card">
+                <h2>Proje panosu</h2>
+                <p>
+                    Oluşturduğunuz her proje, kendi görev panosuna sahip olur. Görevler proje detay ekranında durumlarına göre takip edilir.
+                </p>
+
+                <div class="form-info-list">
+                    <span>Proje bazlı görev takibi</span>
+                    <span>İlerleme yüzdesi</span>
+                    <span>Riskli teslim tarihi takibi</span>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
